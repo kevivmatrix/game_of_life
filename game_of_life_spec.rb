@@ -109,4 +109,68 @@ describe Cell do
       cell.dead_neighbours_among(game_of_life.cells).should =~ [cell3, cell4]
     end
   end
+  context 'should live?' do
+    context 'law 1 - Any live cell with fewer than two live neighbours dies, as if caused by under-population.' do
+      context '0 neighbours' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(4, 3)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_1?(cells).should eq false
+        end
+      end
+      context '1 neighbour' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(2, 2)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_1?(cells).should eq false
+        end
+      end
+      context '2+ neighbours' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(2, 2), Cell.new(1, 2)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_1?(cells).should eq true
+        end
+      end
+    end
+    context 'law 3 - Any live cell with more than three live neighbours dies, as if by overcrowding.' do
+      context '3 or less neighbours' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_3?(cells).should eq true
+        end
+      end
+      context 'more than 3 neighbours' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2), Cell.new(0, 0)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_3?(cells).should eq false
+        end
+      end
+    end
+    context 'law 4 - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.' do
+      context '3 neighbours' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_4?(cells).should eq true
+        end
+      end
+      context 'neighbours less than 3' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_4?(cells).should eq false
+        end
+      end
+      context 'neighbours more than 3' do
+        let(:cell) { Cell.new(1,1) }
+        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2), Cell.new(0, 0)] }
+        it "should not be alive" do
+          cell.should_live_as_per_law_4?(cells).should eq false
+        end
+      end
+    end
+  end
 end

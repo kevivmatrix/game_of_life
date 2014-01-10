@@ -9,7 +9,7 @@ class GameOfLife
   def generate_cells
     matrix.structure.each_with_index do |element, x|
       element.each_with_index do |element, y|
-        cells << Cell.new(x, y)
+        cells << cell = Cell.new(x, y)
       end
     end
   end
@@ -17,7 +17,7 @@ end
 
 class Cell
 
-  attr_accessor :x, :y, :alive
+  attr_accessor :x, :y, :alive, :mates
 
   def initialize x, y, alive=false
     @x, @y, @alive = x, y, alive
@@ -43,6 +43,24 @@ class Cell
 
   def distance_from cell
     (cell.x - x).abs + (cell.y - y).abs
+  end
+
+  def should_live? cells
+    should_live_as_per_law_1?(cells) &&
+      should_live_as_per_law_3(cells) &&
+      should_live_as_per_law_4(cells)
+  end
+
+  def should_live_as_per_law_1? cells
+    neighbours_among(cells).count > 1
+  end
+
+  def should_live_as_per_law_3? cells
+    neighbours_among(cells).count < 4
+  end
+
+  def should_live_as_per_law_4? cells
+    neighbours_among(cells).count == 3
   end
 end
 
