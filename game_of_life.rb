@@ -9,8 +9,14 @@ class GameOfLife
   def generate_cells
     matrix.structure.each_with_index do |element, x|
       element.each_with_index do |element, y|
-        cells << cell = Cell.new(x, y)
+        @cells << Cell.new(x, y)
       end
+    end
+  end
+
+  def next_tick
+    cells.each do |cell|
+      cell.should_live?(cells) ? cell.relive : cell.die
     end
   end
 end
@@ -47,20 +53,28 @@ class Cell
 
   def should_live? cells
     should_live_as_per_law_1?(cells) &&
-      should_live_as_per_law_3(cells) &&
-      should_live_as_per_law_4(cells)
+      should_live_as_per_law_3?(cells) &&
+      should_live_as_per_law_4?(cells)
   end
 
   def should_live_as_per_law_1? cells
-    neighbours_among(cells).count > 1
+    alive_neighbours_among(cells).count > 1
   end
 
   def should_live_as_per_law_3? cells
-    neighbours_among(cells).count < 4
+    alive_neighbours_among(cells).count < 4
   end
 
   def should_live_as_per_law_4? cells
-    neighbours_among(cells).count == 3
+    alive_neighbours_among(cells).count == 3
+  end
+
+  def die
+    @alive = false
+  end
+
+  def relive
+    @alive = true
   end
 end
 

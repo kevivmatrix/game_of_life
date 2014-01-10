@@ -45,6 +45,86 @@ describe "game of life" do
       end
     end
   end
+  context 'next tick' do
+    let(:game_of_life) { GameOfLife.new(3) }
+    let!(:generate_cells) { game_of_life.generate_cells }
+    let(:cell1) { game_of_life.cells[0] }
+    let(:cell2) { game_of_life.cells[1] }
+    let(:cell3) { game_of_life.cells[2] }
+    let(:cell4) { game_of_life.cells[3] }
+    let(:cell5) { game_of_life.cells[4] }
+    let(:cell6) { game_of_life.cells[5] }
+    let(:cell7) { game_of_life.cells[6] }
+    let(:cell8) { game_of_life.cells[7] }
+    let(:cell9) { game_of_life.cells[8] }
+    before do
+      cell1.alive = true
+      cell2.alive = true
+      cell3.alive = true
+      cell4.alive = true
+      game_of_life.next_tick
+    end
+    it "cell1 should live" do
+      cell1.alive.should be_true
+    end
+    it "cell2 should die" do
+      cell2.alive.should be_true
+    end
+    it "cell3 should die" do
+      cell3.alive.should be_false
+    end
+    it "cell4 should die" do
+      cell4.alive.should be_false
+    end
+    it "cell5 should re-live" do
+      cell5.alive.should be_false
+    end
+    it "cell6 should die" do
+      cell6.alive.should be_false
+    end
+    it "cell7 should die" do
+      cell7.alive.should be_false
+    end
+    it "cell8 should die" do
+      cell8.alive.should be_false
+    end
+    it "cell9 should die" do
+      cell9.alive.should be_false
+    end
+    context 'double tick' do
+      before do
+        game_of_life.next_tick
+        game_of_life.next_tick
+      end
+      it "cell1 should live" do
+        cell1.alive.should be_false
+      end
+      it "cell2 should die" do
+        cell2.alive.should be_false
+      end
+      it "cell3 should die" do
+        cell3.alive.should be_false
+      end
+      it "cell4 should die" do
+        cell4.alive.should be_false
+      end
+      it "cell5 should die" do
+        cell5.alive.should be_false
+      end
+      it "cell6 should die" do
+        cell6.alive.should be_false
+      end
+      it "cell7 should die" do
+        cell7.alive.should be_false
+      end
+      it "cell8 should die" do
+        cell8.alive.should be_false
+      end
+      it "cell9 should die" do
+        cell9.alive.should be_false
+      end
+    end
+  end
 end
 
 describe "matrix" do
@@ -113,21 +193,21 @@ describe Cell do
     context 'law 1 - Any live cell with fewer than two live neighbours dies, as if caused by under-population.' do
       context '0 neighbours' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(4, 3)] }
+        let(:cells) { [Cell.new(4, 3, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_1?(cells).should eq false
         end
       end
       context '1 neighbour' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(2, 2)] }
+        let(:cells) { [Cell.new(2, 2, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_1?(cells).should eq false
         end
       end
       context '2+ neighbours' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(2, 2), Cell.new(1, 2)] }
+        let(:cells) { [Cell.new(2, 2, true), Cell.new(1, 2, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_1?(cells).should eq true
         end
@@ -136,14 +216,14 @@ describe Cell do
     context 'law 3 - Any live cell with more than three live neighbours dies, as if by overcrowding.' do
       context '3 or less neighbours' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2)] }
+        let(:cells) { [Cell.new(1, 0, true), Cell.new(0, 1, true), Cell.new(2, 2, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_3?(cells).should eq true
         end
       end
       context 'more than 3 neighbours' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2), Cell.new(0, 0)] }
+        let(:cells) { [Cell.new(1, 0, true), Cell.new(0, 1, true), Cell.new(2, 2, true), Cell.new(0, 0, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_3?(cells).should eq false
         end
@@ -152,25 +232,37 @@ describe Cell do
     context 'law 4 - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.' do
       context '3 neighbours' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2)] }
+        let(:cells) { [Cell.new(1, 0, true), Cell.new(0, 1, true), Cell.new(2, 2, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_4?(cells).should eq true
         end
       end
       context 'neighbours less than 3' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1)] }
+        let(:cells) { [Cell.new(1, 0, true), Cell.new(0, 1, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_4?(cells).should eq false
         end
       end
       context 'neighbours more than 3' do
         let(:cell) { Cell.new(1,1) }
-        let(:cells) { [Cell.new(1, 0), Cell.new(0, 1), Cell.new(2, 2), Cell.new(0, 0)] }
+        let(:cells) { [Cell.new(1, 0, true), Cell.new(0, 1, true), Cell.new(2, 2, true), Cell.new(0, 0, true)] }
         it "should not be alive" do
           cell.should_live_as_per_law_4?(cells).should eq false
         end
       end
+    end
+  end
+  context 'die' do
+    let(:cell) { Cell.new(1, 1, true) }
+    it "should kill the cell" do
+      expect { cell.die }.to change(cell, :alive).from(true).to(false)
+    end
+  end
+  context 'relive' do
+    let(:cell) { Cell.new(1, 1) }
+    it "should kill the cell" do
+      expect { cell.relive }.to change(cell, :alive).from(false).to(true)
     end
   end
 end
