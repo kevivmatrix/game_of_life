@@ -1,14 +1,14 @@
 class GameOfLife
 
-  attr_accessor :total_cells, :matrix, :cells
+  attr_accessor :total_cells, :matrix, :cells, :matrix_size
 
   def initialize matrix_size=10
-    @matrix, @cells = Matrix.new(matrix_size), []
+    @matrix_size, @matrix, @cells = matrix_size, Matrix.new(matrix_size), []
   end
 
   def generate_cells
-    matrix.structure.each_with_index do |element, x|
-      element.each_with_index do |element, y|
+    matrix.structure.each_with_index do |element, y|
+      element.each_with_index do |element, x|
         @cells << Cell.new(x, y)
       end
     end
@@ -16,64 +16,93 @@ class GameOfLife
 
   def next_tick
     cells.each do |cell|
-      cell.should_live?(cells) ? cell.relive : cell.die
+      cell.die if cell.cache_alive? && !cell.show_stay_live?(cells)
+      cell.reborn if cell.cache_dead? && cell.should_be_reborn?(cells)
     end
+    cells.each {|cell| cell.cache_alive = cell.alive}
+  end
+
+  def print_cells
+    matrix_size.times do |y|
+      matrix_size.times do |x|
+        cell = find_cell_by_x_and_y(x, y)
+        cell.alive? ? print("O") : print("-")
+      end
+      print "\n"
+    end
+    print "\n"
+  end
+
+  def find_cell_by_x_and_y x, y
+    cells.select {|cell| cell.x == x && cell.y == y}.first
   end
 end
 
 class Cell
 
-  attr_accessor :x, :y, :alive, :mates
+  attr_accessor :x, :y, :alive, :mates, :cache_alive
 
   def initialize x, y, alive=false
-    @x, @y, @alive = x, y, alive
+    @x, @y, @alive, @cache_alive = x, y, alive, alive
   end
 
   def neighbours_among cells
-    cells.select do |cell|
-      distance_from(cell) <= 2 && distance_from(cell) > 0
+    @mates = cells - [self]
+    mates.select do |cell|
+      neighbour?(cell)
     end
   end
 
   def alive_neighbours_among cells
-    neighbours_among(cells).select { |cell| cell.alive }
+    neighbours_among(cells).select { |cell| cell.cache_alive? }
   end
 
   def dead_neighbours_among cells
-    neighbours_among(cells).select { |cell| cell.dead? }
+    neighbours_among(cells).select { |cell| cell.cache_dead? }
+  end
+
+  def cache_alive?
+    cache_alive
+  end
+
+  def cache_dead?
+    !cache_alive
+  end
+
+  def alive?
+    alive
   end
 
   def dead?
     !alive
   end
 
-  def distance_from cell
-    (cell.x - x).abs + (cell.y - y).abs
+  def neighbour? cell
+    distance_from_x(cell) < 2 && distance_from_y(cell) < 2
   end
 
-  def should_live? cells
-    should_live_as_per_law_1?(cells) &&
-      should_live_as_per_law_3?(cells) &&
-      should_live_as_per_law_4?(cells)
+  def distance_from_x cell
+    (cell.x - x).abs
   end
 
-  def should_live_as_per_law_1? cells
-    alive_neighbours_among(cells).count > 1
+  def distance_from_y cell
+    (cell.y - y).abs
   end
 
-  def should_live_as_per_law_3? cells
-    alive_neighbours_among(cells).count < 4
+  def show_stay_live? cells
+    (alive_neighbours_among(cells).count == 2 ||
+      alive_neighbours_among(cells).count == 3) && alive?
   end
 
-  def should_live_as_per_law_4? cells
-    alive_neighbours_among(cells).count == 3
+  def should_be_reborn? cells
+    alive_neighbours_among(cells).count == 3 && dead?
   end
 
   def die
     @alive = false
   end
 
-  def relive
+  def reborn
     @alive = true
   end
 end
