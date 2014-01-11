@@ -1,6 +1,6 @@
 class GameOfLife
 
-  attr_accessor :total_cells, :matrix, :cells, :matrix_size
+  attr_accessor :matrix, :cells, :matrix_size
 
   def initialize matrix_size=10
     @matrix_size, @matrix, @cells = matrix_size, Matrix.new(matrix_size), []
