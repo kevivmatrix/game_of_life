@@ -1,22 +1,15 @@
-require "./game_of_life.rb"
+require "./ruby/game_of_life.rb"
 
-game = GameOfLife.new(5)
+game = GameOfLife.new(10)
 game.generate_cells
 game.print_cells
 # alive list
-game.cells[0].alive = true
-game.cells[1].alive = true
-game.cells[2].alive = true
-game.cells[3].alive = true
-game.cells[5].alive = true
-game.cells[7].alive = true
-game.cells[8].alive = true
-game.cells[9].alive = true
-game.cells[11].alive = true
-game.cells[20].alive = true
-game.cells[21].alive = true
+game.cells[22].alive = true
 game.cells[23].alive = true
-
+game.cells[24].alive = true
+game.cells[26].alive = true
+game.cells[16].alive = true
+game.cells[36].alive = true
 # ticks
 # game.print_cells
 loop do

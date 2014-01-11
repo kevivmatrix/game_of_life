@@ -22,16 +22,16 @@ var GameOfLife = function(matrix_size){
       cell.cache_alive = cell.alive;
     });
   }
-  _this.print_cells = function(){
-    $("#table tbody").html("");
+  _this.print_cells = function(table_id){
+    $("#" + table_id + " tbody").html("");
     _.times(_this.matrix_size, function(y){
-      $("#table tbody").append("<tr id=" + "y_" + y + ">");
+      $("#" + table_id + " tbody").append("<tr id=" + table_id + "y_" + y + ">");
       _.times(_this.matrix_size, function(x){
         var cell = _this.find_cell_by_x_and_y(x, y);
-        var text = cell.alive ? "O" : "-";
-        $("#y_" + y).append("<td>" + text + "</td>");
+        var class_name = cell.alive ? "live" : "";
+        $("#" + table_id + "y_" + y).append("<td class='" + class_name + "' id='" + table_id + "_" + x + "_" + y + "'></td>");
       });
-      $("#table tbody").append("</tr>")
+      $("#" + table_id + " tbody").append("</tr>")
     });
   }
   _this.find_cell_by_x_and_y = function(x, y){
@@ -94,6 +94,9 @@ var Cell = function(x, y){
   _this.reborn = function(){
     _this.alive = true;
   }
+  _this.live = function(){
+    _this.alive = _this.cache_alive = true;
+  }
 
   return _this;
 }
@@ -108,24 +111,37 @@ var Matrix = function(size){
   return _this;
 }
 
-var game = new GameOfLife(5);
-game.generate_cells();
+$(document).ready(function(){
+  var player_1_game = new GameOfLife(10);
+  player_1_game.generate_cells();
+  player_1_game.print_cells("player_1");
 
-game.cells[0].cache_alive = game.cells[0].alive = true;
-game.cells[1].cache_alive = game.cells[1].alive = true;
-game.cells[2].cache_alive = game.cells[2].alive = true;
-game.cells[3].cache_alive = game.cells[3].alive = true;
-game.cells[5].cache_alive = game.cells[5].alive = true;
-game.cells[7].cache_alive = game.cells[7].alive = true;
-game.cells[8].cache_alive = game.cells[8].alive = true;
-game.cells[9].cache_alive = game.cells[9].alive = true;
-game.cells[11].cache_alive = game.cells[11].alive = true;
-game.cells[20].cache_alive = game.cells[20].alive = true;
-game.cells[21].cache_alive = game.cells[21].alive = true;
-game.cells[23].cache_alive = game.cells[23].alive = true;
+  var player_2_game = new GameOfLife(10);
+  player_2_game.generate_cells();
+  player_2_game.print_cells("player_2");
 
-game.print_cells();
-timer = setInterval(function(){
-  game.next_tick();
-  game.print_cells();
-}, 5000);
+  $("#player_1").on("click", "td", function(){
+    var x_y = this.id.replace("player_1_", "").split("_");
+    var x = x_y[0];
+    var y = x_y[1];
+    var cell = player_1_game.find_cell_by_x_and_y(x, y);
+    cell.live();
+    $(this).addClass("live");
+  });
+  $("#player_2").on("click", "td", function(){
+    var x_y = this.id.replace("player_2_", "").split("_");
+    var x = x_y[0];
+    var y = x_y[1];
+    var cell = player_2_game.find_cell_by_x_and_y(x, y);
+    cell.live();
+    $(this).addClass("live");
+  });
+  $("#start").click(function(){
+    var timer = setInterval(function(){
+      player_1_game.next_tick();
+      player_2_game.next_tick();
+      player_1_game.print_cells("player_1");
+      player_2_game.print_cells("player_2");
+    }, 1000)
+  });
+});
